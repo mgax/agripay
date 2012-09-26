@@ -40,6 +40,10 @@ class RecordFilter(flatkit.datatables.FilterView):
     def query(self, options):
         select = Record.select()
 
+        order_by = options.get('order_by')
+        if order_by:
+            select = select.order_by(order_by)
+
         if options['limit']:
             select = select.limit(options['limit'])
         if options['offset']:
