@@ -1,6 +1,7 @@
 import csv
 import flask
 from peewee import Model, CharField, DecimalField, SqliteDatabase
+import flatkit.datatables
 
 
 db = SqliteDatabase(None, autocommit=False)
@@ -25,10 +26,30 @@ class DatabasePlugin(object):
 
 queries = flask.Blueprint('queries', __name__)
 
+
 @queries.route('/')
 def index():
-    record_list = Record.select().limit(40)
-    return flask.render_template('table.html', record_list=record_list)
+    return flask.render_template('table.html')
+
+
+class RecordFilter(flatkit.datatables.FilterView):
+
+    def query(self, options):
+        select = Record.select()
+
+        if options['limit']:
+            select = select.limit(options['limit'])
+        if options['offset']:
+            select = select.offset(options['offset'])
+
+        if options['count']:
+            return select.count()
+
+        else:
+            return [{'name': r.name, 'total': float(r.total)} for r in select]
+
+
+queries.add_url_rule('/dt_query', view_func=RecordFilter.as_view('dt_query'))
 
 
 CSV_CONFIG = {
