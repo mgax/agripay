@@ -9,7 +9,7 @@ queries = flask.Blueprint('queries', __name__)
 
 @queries.route('/')
 def index():
-    record_list = data.Record.select().limit(10)
+    record_list = data.Record.select().limit(40)
     return flask.render_template('table.html', record_list=record_list)
 
 

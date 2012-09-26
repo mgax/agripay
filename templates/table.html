@@ -3,17 +3,38 @@
 <head>
   <meta charset="utf-8">
   <title>AgriPay</title>
+  <link rel="stylesheet" href="http://grep.ro/quickpub/lib/datatables-1.9.4/css/jquery.dataTables.css">
 </head>
 <body>
 
   <table>
-  {% for record in record_list %}
-    <tr>
-      <td>{{ record.name }}</td>
-      <td>{{ record.total }}</td>
-    </tr>
-  {% endfor %}
+
+    <thead>
+      <th>Name</th>
+      <th>Total</th>
+    </thead>
+
+    <tbody>
+    {% for record in record_list %}
+      <tr>
+        <td>{{ record.name }}</td>
+        <td>{{ record.total }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+
   </table>
 
 </body>
+
+<script src="http://grep.ro/quickpub/lib/jquery-1.7.2/jquery.min.js"></script>
+<script src="http://grep.ro/quickpub/lib/datatables-1.9.4/js/jquery.dataTables.js"></script>
+<script>
+$(document).ready(function() {
+
+  $('table').dataTable();
+
+});
+</script>
+
 </html>
