@@ -46,7 +46,12 @@ class RecordFilter(flatkit.datatables.FilterView):
             return select.count()
 
         else:
-            return [{'name': r.name, 'total': float(r.total)} for r in select]
+            return [{
+                'name': r.name,
+                'code': r.code,
+                'town': r.town,
+                'total': float(r.total),
+            } for r in select]
 
 
 queries.add_url_rule('/dt_query', view_func=RecordFilter.as_view('dt_query'))

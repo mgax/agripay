@@ -10,7 +10,9 @@
   <table>
 
     <thead>
-      <th>Name</th>
+      <th>Nume</th>
+      <th>Cod</th>
+      <th>Localitate</th>
       <th>Total</th>
     </thead>
 
@@ -31,6 +33,8 @@ $(document).ready(function() {
     "bServerSide": true,
     "aoColumns": [
       {"sName": "name"},
+      {"sName": "code"},
+      {"sName": "town"},
       {"sName": "total"}
     ],
     "sAjaxSource": {{ url_for('.dt_query')|tojson|safe }},
