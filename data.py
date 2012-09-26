@@ -32,7 +32,11 @@ def index():
     stats = {
         'sum(total)': Record.select('sum(total) as s').get().s,
     }
-    return flask.render_template('table.html', stats=stats)
+    towns = [r.town for r in Record.select('distinct(town) as town')]
+    return flask.render_template('table.html', **{
+        'stats': stats,
+        'towns': sorted(towns),
+    })
 
 
 class RecordFilter(flatkit.datatables.FilterView):

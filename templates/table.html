@@ -4,8 +4,15 @@
   <meta charset="utf-8">
   <title>AgriPay</title>
   <link rel="stylesheet" href="http://grep.ro/quickpub/lib/datatables-1.9.4/css/jquery.dataTables.css">
+  <link rel="stylesheet" href="http://grep.ro/quickpub/lib/chosen-0.9.8/chosen.css">
 </head>
 <body>
+
+  <select multiple name="town" data-placeholder="Alegeți localități">
+  {% for town in towns %}
+    <option>{{ town }}</option>
+  {% endfor %}
+  </select>
 
   <table>
 
@@ -27,6 +34,7 @@
 
 <script src="http://grep.ro/quickpub/lib/jquery-1.7.2/jquery.min.js"></script>
 <script src="http://grep.ro/quickpub/lib/datatables-1.9.4/js/jquery.dataTables.js"></script>
+<script src="http://grep.ro/quickpub/lib/chosen-0.9.8/chosen.jquery.js"></script>
 <script>
 $(document).ready(function() {
 
@@ -45,6 +53,8 @@ $(document).ready(function() {
     "bScrollCollapse": true,
     "sScrollY": "400px"
   });
+
+  $('select[name=town]').chosen();
 
 });
 </script>
