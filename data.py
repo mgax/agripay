@@ -24,7 +24,7 @@ class DatabasePlugin(object):
 
 
 CSV_CONFIG = {
-    'a': {
+    'apdrp.ro': {
         'csv_kwargs': {'delimiter': ';'},
     },
 }
