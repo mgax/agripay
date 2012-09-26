@@ -33,7 +33,11 @@ $(document).ready(function() {
       {"sName": "name"},
       {"sName": "total"}
     ],
-    "sAjaxSource": {{ url_for('.dt_query')|tojson|safe }}
+    "sAjaxSource": {{ url_for('.dt_query')|tojson|safe }},
+    "iDisplayLength": 20,
+    "bScrollInfinite": true,
+    "bScrollCollapse": true,
+    "sScrollY": "400px"
   });
 
 });
