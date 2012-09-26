@@ -23,6 +23,14 @@ class DatabasePlugin(object):
         app.extensions['agripay_database'] = self
 
 
+queries = flask.Blueprint('queries', __name__)
+
+@queries.route('/')
+def index():
+    record_list = Record.select().limit(40)
+    return flask.render_template('table.html', record_list=record_list)
+
+
 CSV_CONFIG = {
     'apdrp.ro': {
         'csv_kwargs': {'delimiter': ';'},
@@ -56,3 +64,8 @@ def register_commands(manager):
                     }
                     record = Record.create(**data)
             db.commit()
+
+
+def initialize(app):
+    app.register_blueprint(queries)
+    DatabasePlugin().initialize(app)
