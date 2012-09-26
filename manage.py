@@ -9,7 +9,8 @@ queries = flask.Blueprint('queries', __name__)
 
 @queries.route('/')
 def index():
-    return "hello world!"
+    record_list = ingest.Record.select().limit(10)
+    return flask.render_template('table.html', record_list=record_list)
 
 
 def create_app():

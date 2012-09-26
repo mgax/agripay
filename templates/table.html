@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AgriPay</title>
+</head>
+<body>
+
+  <table>
+  {% for record in record_list %}
+    <tr>
+      <td>{{ record.name }}</td>
+      <td>{{ record.total }}</td>
+    </tr>
+  {% endfor %}
+  </table>
+
+</body>
+</html>
