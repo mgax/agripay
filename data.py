@@ -29,7 +29,10 @@ queries = flask.Blueprint('queries', __name__)
 
 @queries.route('/')
 def index():
-    return flask.render_template('table.html')
+    stats = {
+        'sum(total)': Record.select('sum(total) as s').get().s,
+    }
+    return flask.render_template('table.html', stats=stats)
 
 
 class RecordFilter(flatkit.datatables.FilterView):
