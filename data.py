@@ -1,3 +1,5 @@
+import sys
+import csv
 import flask
 from peewee import Model, CharField, DecimalField, SqliteDatabase
 import flatkit.datatables
@@ -107,6 +109,14 @@ def register_commands(manager):
                     }
                     record = Record.create(**data)
             db.commit()
+
+    @manager.command
+    def dump_csv():
+        out = csv.writer(sys.stdout)
+        out.writerow(['name', 'code', 'town', 'total'])
+        for record in Record.select():
+            out.writerow([record.name.encode('utf-8'),
+                          record.code, record.town, record.total])
 
 
 def initialize(app):
