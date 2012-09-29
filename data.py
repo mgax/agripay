@@ -83,16 +83,7 @@ def register_commands(manager):
     @manager.command
     def load_apdrp_csv(csv_path):
         def split_line(line):
-            clean = html_unescape(line).strip()
-            spl = clean.split(';')
-            if len(spl) == 8:
-                return spl
-            else:
-                try:
-                    first, other = clean.split(';RO', 1)
-                except:
-                    import pdb; pdb.set_trace()
-                return [first] + ('RO' + other).split(';')
+            return line.strip().rsplit(';', 7)
 
         with db.transaction():
             with open(csv_path, 'rb') as f:
