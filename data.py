@@ -1,7 +1,7 @@
-import csv
 import flask
 from peewee import Model, CharField, DecimalField, SqliteDatabase
 import flatkit.datatables
+from utils import html_unescape
 
 
 db = SqliteDatabase(None, autocommit=False)
@@ -68,13 +68,6 @@ class RecordFilter(flatkit.datatables.FilterView):
 queries.add_url_rule('/dt_query', view_func=RecordFilter.as_view('dt_query'))
 
 
-CSV_CONFIG = {
-    'apdrp.ro': {
-        'csv_kwargs': {'delimiter': ';'},
-    },
-}
-
-
 def register_commands(manager):
 
     @manager.command
@@ -86,18 +79,31 @@ def register_commands(manager):
         Record.drop_table(fail_silently=True)
 
     @manager.command
-    def load_csv(config_name, csv_path):
-        config = CSV_CONFIG[config_name]
+    def load_apdrp_csv(csv_path):
+        def split_line(line):
+            clean = html_unescape(line).strip()
+            spl = clean.split(';')
+            if len(spl) == 8:
+                return spl
+            else:
+                try:
+                    first, other = clean.split(';RO', 1)
+                except:
+                    import pdb; pdb.set_trace()
+                return [first] + ('RO' + other).split(';')
 
         with db.transaction():
             with open(csv_path, 'rb') as f:
-                csv_kwargs = config.get('csv_kwargs', {})
-                for csvrow in csv.DictReader(f, **csv_kwargs):
+                head = next(f).strip().split(';')
+                for i, line in enumerate(f):
+                    row = split_line(line)
+                    assert len(head) == len(row), 'line %d: %r' % (i, row)
+                    rowdict = dict(zip(head, row))
                     data = {
-                        'name': csvrow['Denumire beneficiar'].decode('utf-8'),
-                        'code': csvrow['Cod unic'],
-                        'town': csvrow['Localitate'].decode('utf-8'),
-                        'total': csvrow['Total plati'],
+                        'name': rowdict['Denumire beneficiar'].decode('utf-8'),
+                        'code': rowdict['Cod unic'],
+                        'town': rowdict['Localitate'].decode('utf-8'),
+                        'total': rowdict['Total plati'],
                     }
                     record = Record.create(**data)
             db.commit()
