@@ -8,11 +8,19 @@
 </head>
 <body>
 
+
+  <p>
+    [<a href="/">Map</a>]
+    [<a href="/table">Table</a>]
+  </p>
+
+{#
   <select multiple name="town" data-placeholder="Alegeți localități">
   {% for town in towns %}
     <option>{{ town }}</option>
   {% endfor %}
   </select>
+#}
 
   <table>
 

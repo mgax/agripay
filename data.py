@@ -37,6 +37,11 @@ queries = flask.Blueprint('queries', __name__)
 
 @queries.route('/')
 def index():
+    return flask.render_template('index.html')
+
+
+@queries.route('/table')
+def table():
     stats = {
         'sum(total)': Record.select('sum(total) as s').get().s,
     }
