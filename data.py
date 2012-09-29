@@ -11,7 +11,7 @@ import flatkit.datatables
 from utils import html_unescape
 
 
-db = SqliteDatabase(None, autocommit=False)
+db = SqliteDatabase(None, autocommit=False, threadlocals=True)
 
 refdata = path(__file__).parent / 'refdata'
 
