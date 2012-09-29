@@ -70,6 +70,21 @@ class RecordFilter(flatkit.datatables.FilterView):
 queries.add_url_rule('/dt_query', view_func=RecordFilter.as_view('dt_query'))
 
 
+def read_and_clean_csv(f):
+    head = next(f).strip().split(';')
+    for i, line in enumerate(f):
+        row = line.strip().rsplit(';', 7)
+        assert len(head) == len(row), 'line %d: %r' % (i, row)
+        rowdict = dict(zip(head, row))
+        data = {
+            'name': rowdict['Denumire beneficiar'].decode('utf-8'),
+            'code': rowdict['Cod unic'],
+            'town': rowdict['Localitate'].decode('utf-8'),
+            'total': rowdict['Total plati'],
+        }
+        yield data
+
+
 def register_commands(manager):
 
     @manager.command
@@ -81,24 +96,19 @@ def register_commands(manager):
         Record.drop_table(fail_silently=True)
 
     @manager.command
-    def load_apdrp_csv(csv_path):
-        def split_line(line):
-            return line.strip().rsplit(';', 7)
+    def clean_csv():
+        header = ['name', 'code', 'town', 'total']
+        out = csv.writer(sys.stdout)
+        out.writerow(header)
+        for data in read_and_clean_csv(sys.stdin):
+            out.writerow([data['name'].encode('utf-8'),
+                          data['code'], data['town'], data['total']])
 
+    @manager.command
+    def load_apdrp_csv():
         with db.transaction():
-            with open(csv_path, 'rb') as f:
-                head = next(f).strip().split(';')
-                for i, line in enumerate(f):
-                    row = split_line(line)
-                    assert len(head) == len(row), 'line %d: %r' % (i, row)
-                    rowdict = dict(zip(head, row))
-                    data = {
-                        'name': rowdict['Denumire beneficiar'].decode('utf-8'),
-                        'code': rowdict['Cod unic'],
-                        'town': rowdict['Localitate'].decode('utf-8'),
-                        'total': rowdict['Total plati'],
-                    }
-                    record = Record.create(**data)
+            for data in read_and_clean_csv(sys.stdin):
+                record = Record.create(**data)
             db.commit()
 
     @manager.command
