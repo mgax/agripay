@@ -1,12 +1,18 @@
+# encoding: utf-8
 import sys
 import csv
+from collections import defaultdict
+from pprint import pprint as pp
 import flask
 from peewee import Model, CharField, DecimalField, SqliteDatabase
+from path import path
 import flatkit.datatables
 from utils import html_unescape
 
 
 db = SqliteDatabase(None, autocommit=False)
+
+refdata = path(__file__).parent / 'refdata'
 
 
 class Record(Model):
@@ -70,6 +76,23 @@ class RecordFilter(flatkit.datatables.FilterView):
 queries.add_url_rule('/dt_query', view_func=RecordFilter.as_view('dt_query'))
 
 
+def ascify(text):
+    return text.decode('utf-8') \
+               .replace(u'Ș', 'S') \
+               .replace(u'Â', 'A') \
+               .replace(u'Ă', 'A') \
+               .replace(u'Ț', 'T')
+
+
+def read_localities():
+    columns = ['code', '1', 'judet', '3', 'name', 'name_ascii', 'x', 'y']
+    with (refdata / 'comune.txt').open('rb') as f:
+        for row in csv.DictReader(f, columns):
+            row['judet_ascii'] = ascify(row['judet'])
+            yield row
+
+
+
 def read_and_clean_csv(f):
     head = next(f).strip().split(';')
     for i, line in enumerate(f):
@@ -118,6 +141,53 @@ def register_commands(manager):
         for record in Record.select():
             out.writerow([record.name.encode('utf-8'),
                           record.code, record.town, record.total])
+
+    @manager.command
+    def georeference():
+        #columns = ['code', '1', 'judet', '3', 'name', 'name_ascii', 'x', 'y']
+        locmap = {(l['judet_ascii'], l['name_ascii']): l for l in read_localities()}
+        count = defaultdict(int)
+        not_matched = []
+        by_coord = defaultdict(float)
+        for row in csv.DictReader(sys.stdin):
+            if not row['county']:
+                count['nojudet'] += 1
+                continue
+            if row['county'] == row['town'] == 'BUCURESTI':
+                count['bucuresti'] += 1
+                continue
+            if 'BUCURESTI SECTOR ' in row['town']:
+                row['town'] = row['town'].replace('BUCURESTI SECTOR ',
+                                                  'BUCURESTI SECTORUL ')
+                row['county'] = 'BUCURESTI'
+            elif row['county'] == 'SATU-MARE':
+                row['county'] = 'SATU MARE'
+            if row['town'] == 'BICAZ CHEI':
+                row['town'] = 'BICAZ-CHEI'
+            for v in ['ORAS ', 'MUNICIPIUL ', '']:
+                key = (row['county'], v + row['town'])
+                locality = locmap.get(key)
+                if locality is not None:
+                    break
+            else:
+                count['?'] += 1
+                #not_matched.append(key)
+                if len(not_matched) > 10:
+                    break
+                continue
+            count['ok'] += 1
+            by_coord[(locality['x'], locality['y'])] += float(row['total'])
+
+        out = csv.DictWriter(sys.stdout, ['value', 'x', 'y'])
+        out.writerow({'x': 'x', 'y': 'y', 'value': 'value'})
+        for (x, y), value in by_coord.items():
+            out.writerow({
+                'x': x,
+                'y': y,
+                'value': value,
+            })
+        #pp(dict(count))
+        #pp(not_matched)
 
 
 def initialize(app):
