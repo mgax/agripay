@@ -17,5 +17,14 @@ manager = Manager(create_app)
 data.register_commands(manager)
 
 
+@manager.option('-s', '--socket')
+def runfcgi(socket):
+    from flup.server.fcgi import WSGIServer
+    app = create_app()
+    WSGIServer(app, debug=app.debug, bindAddress=socket, umask=0).run()
+
+
 if __name__ == '__main__':
+    from utils import set_up_logging
+    set_up_logging()
     manager.run()

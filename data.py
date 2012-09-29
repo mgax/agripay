@@ -1,5 +1,6 @@
 # encoding: utf-8
 import sys
+import os
 import csv
 from collections import defaultdict
 from pprint import pprint as pp
@@ -28,7 +29,10 @@ class Record(Model):
 class DatabasePlugin(object):
 
     def initialize(self, app):
-        Record.Meta.database.init(app.config['DATABASE_PATH'])
+        db_path = os.environ.get('DATABASE_PATH')
+        if db_path is None:
+            db_path = path(app.instance_path) / 'db.sqlite'
+        Record.Meta.database.init(db_path)
         app.extensions['agripay_database'] = self
 
 
