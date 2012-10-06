@@ -4,9 +4,11 @@ import os
 import csv
 from collections import defaultdict
 from pprint import pprint as pp
+import math
 import flask
 from peewee import Model, CharField, DecimalField, SqliteDatabase
 from path import path
+import geojson
 import flatkit.datatables
 from utils import html_unescape
 
@@ -14,6 +16,13 @@ from utils import html_unescape
 db = SqliteDatabase(None, autocommit=False, threadlocals=True)
 
 refdata = path(__file__).parent / 'refdata'
+
+EPSG_31700_CRS = {
+    "type": "name",
+    "properties": {
+        "name": "urn:ogc:def:crs:EPSG::31700",
+    },
+}
 
 
 class Record(Model):
@@ -94,7 +103,8 @@ def ascify(text):
 
 
 def read_localities():
-    columns = ['code', '1', 'judet', '3', 'name', 'name_ascii', 'x', 'y']
+    columns = ['code', '1', 'judet', 'judet_code',
+               'name', 'name_ascii', 'x', 'y']
     with (refdata / 'comune.txt').open('rb') as f:
         for row in csv.DictReader(f, columns):
             row['judet_ascii'] = ascify(row['judet'])
@@ -197,6 +207,90 @@ def register_commands(manager):
             })
         #pp(dict(count))
         #pp(not_matched)
+
+    @manager.command
+    def group_by_comuna():
+        localities = list(read_localities())
+        n_localities = defaultdict(int)
+        loc_by_name = defaultdict(list)
+        for l in localities:
+            n_localities[l['name_ascii']] += 1
+            loc_by_name[l['name_ascii']].append(l)
+        locmap = {l['name_ascii']: l for l in localities}
+
+        grand_total = 0
+        by_town = defaultdict(float)
+        geotype = defaultdict(float)
+        bug = defaultdict(float)
+        fuzzy = defaultdict(float)
+        fuzzy_n = defaultdict(int)
+
+        for row in csv.DictReader(sys.stdin, delimiter=';'):
+            total = float(row['Total plati'])
+            localitate = row['Localitate']
+            if localitate not in n_localities:
+                for fix_pattern in ['MUNICIPIUL %s', 'ORAS %s']:
+                    fix = fix_pattern % localitate
+                    if fix in n_localities:
+                        localitate = fix
+                        break
+                else:
+                    if 'BUCURESTI' in localitate:
+                        localitate = 'BUCURESTI SECTORUL 1'
+            n_loc = n_localities.get(localitate, 0)
+            if n_loc < 1:
+                geotype['bug'] += total
+                bug[localitate] += total
+            elif n_loc == 1:
+                geotype['ok'] += total
+            else:
+                geotype['fuzzy'] += total
+                fuzzy[localitate] += total
+                fuzzy_n[localitate] += 1
+            grand_total += total
+            by_town[localitate] += total
+
+        #print 'grand total: %11d' % grand_total
+        #print '   ok total: %11d (%.4f)' % (geotype['ok'],
+        #                                    geotype['ok'] / grand_total)
+        #print 'fuzzy total: %11d (%.4f)' % (geotype['fuzzy'],
+        #                                    geotype['fuzzy'] / grand_total)
+        #print '  bug total: %11d (%.4f)' % (geotype['bug'],
+        #                                    geotype['bug'] / grand_total)
+
+        #top_bug = sorted(bug.items(), key=lambda kv: kv[1], reverse=True)
+        #top_fuzzy = sorted(fuzzy.items(), key=lambda kv: kv[1], reverse=True)
+        ##pp(top_bug[:10])
+        #n = 30
+        #fuzzy_top_n = top_fuzzy[:n]
+        #sum_top_n = sum(f[1] for f in fuzzy_top_n)
+        #print 'fuztop %4d: %11d (%.4f)' % (n, sum_top_n, sum_top_n / grand_total)
+        #print '=== fuzzy ==='
+        #for name, value in top_fuzzy:
+        #    print '%10d %3d %s' % (value, fuzzy_n[name], name)
+
+        layer = geojson.FeatureCollection([], crs=EPSG_31700_CRS)
+        for name in by_town:
+            if name not in loc_by_name:
+                continue
+            locs_with_name = loc_by_name[name]
+            value_for_each = by_town[name] / len(locs_with_name)
+            for l in locs_with_name:
+                the_point = geojson.Point([float(l['x']), float(l['y'])])
+                the_feature = geojson.Feature(geometry=the_point, id=l['code'])
+                the_feature.properties.update({
+                    'name': name,
+                    'judet': l['judet_ascii'],
+                    'judet_code': l['judet_code'],
+                    'total': value_for_each,
+                    'total_sqrt': math.sqrt(value_for_each),
+                    'ambiguity': len(locs_with_name),
+                })
+                layer.features.append(the_feature)
+
+        print geojson.dumps(layer, indent=2)
+
+        # ogr2ogr -f sqlite -overwrite money.db money.geojson
 
 
 def initialize(app):
