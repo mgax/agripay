@@ -283,7 +283,7 @@ def register_commands(manager):
                     'judet': l['judet_ascii'],
                     'judet_code': l['judet_code'],
                     'total': value_for_each,
-                    'total_sqrt': math.sqrt(value_for_each),
+                    'circle_size': math.sqrt(value_for_each) * .01,
                     'ambiguity': len(locs_with_name),
                 })
                 layer.features.append(the_feature)
