@@ -1,20 +1,27 @@
 <!doctype html>
 <html>
+{% set lib_url = "http://grep.ro/quickpub/lib" %}
 <head>
   <meta charset="utf-8">
   <title>AgriPay</title>
-  <link rel="stylesheet" href="http://grep.ro/quickpub/lib/datatables-1.9.4/css/jquery.dataTables.css">
-  <link rel="stylesheet" href="http://grep.ro/quickpub/lib/chosen-0.9.8/chosen.css">
+  <link rel="stylesheet"
+        href="{{ lib_url }}/OpenLayers-2.12/theme/default/style.css">
+  <style>
+    #map {
+      width: 940px;
+      height: 650px;
+      border: 2px solid #999;
+    }
+  </style>
 </head>
 <body>
 
+  <div id="map"></div>
 
-  <p>
-    [<a href="/">Map</a>]
-    [<a href="/table">Table</a>]
-  </p>
-  <img src="{{ url_for('static', filename='out-small.png') }}">
-
+  <script>window.App = {};</script>
+  <script src="{{ lib_url }}/jquery-1.7.2/jquery.min.js"></script>
+  <script src="{{ lib_url }}/OpenLayers-2.12/OpenLayers.js"></script>
+  <script src="{{ url_for('static', filename='map.js') }}"></script>
 
 </body>
 </html>
