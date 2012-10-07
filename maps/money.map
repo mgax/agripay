@@ -1,0 +1,85 @@
+MAP
+  EXTENT         2210000 5310000 3440000 6160000
+  IMAGECOLOR     255 255 255
+
+  OUTPUTFORMAT
+    name "png"
+    DRIVER AGG/PNG
+    IMAGEMODE RGBA
+    TRANSPARENT on
+  END
+
+  PROJECTION
+    "init=epsg:3857"
+  END
+
+  SYMBOL
+    NAME "circle"
+    TYPE ellipse
+    POINTS
+      1 1
+    END
+    FILLED true
+  END
+
+  LAYER
+    NAME         money
+    TYPE         POINT
+
+    CONNECTIONTYPE OGR
+    CONNECTION "money_per_comuna.db"
+    DATA "select geometry, circle_size from ogrgeojson order by circle_size desc"
+
+    PROJECTION
+      "init=epsg:31700"
+    END
+
+    CLASS
+      NAME       "money_per_comuna"
+
+      STYLE
+        SYMBOL       "circle"
+        SIZE         [circle_size]
+        COLOR        232 232 232
+        OUTLINECOLOR 32 32 32
+        OPACITY 75
+      END
+
+    END
+
+  END
+
+  LAYER
+    NAME         judete
+    TYPE         POLYGON
+
+    CONNECTIONTYPE OGR
+    CONNECTION "judete_ro.db"
+    DATA "judete_ro"
+
+    PROJECTION
+      "init=epsg:31700"
+    END
+
+    CLASS
+      NAME       "judete_ro"
+
+      STYLE
+        COLOR        232 232 232
+        OUTLINECOLOR 32 32 32
+      END
+
+    END
+
+  END
+
+  WEB
+    METADATA
+      "wms_title"           "WMS Demo Server"
+      "wms_onlineresource"  "http://my.host.com/cgi-bin/mapserv?map=wms.map&"
+      "wms_srs"             "EPSG:3857"
+      "wms_enable_request"  "GetMap"
+    END
+  END
+
+END

@@ -9,3 +9,5 @@ simplejson==2.6.2
 geojson==1.0.1
 gunicorn==0.14.6
 honcho==0.1.0
+Paste==1.7.5.1
+WebOb==1.2.2

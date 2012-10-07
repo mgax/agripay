@@ -3,12 +3,14 @@
 import flask
 from flask.ext.script import Manager
 import data
+import viewer
 
 
 def create_app():
     app = flask.Flask(__name__, instance_relative_config=True)
     app.config.from_pyfile('settings.py', silent=True)
     data.initialize(app)
+    viewer.initialize(app)
     return app
 
 
