@@ -4,7 +4,7 @@ Jinja2==2.6
 Werkzeug==0.8.3
 peewee==1.0.0
 path.py==2.4
--e git+https://github.com/eaudeweb/flatkit.git@97d4b4c06c4cfc4315b009ffc37d4ba06182a80f#egg=flatkit-dev
+-e git+https://github.com/eaudeweb/flatkit.git@14ea7dbb5ecf96b4df66e4b1c26ed4f446a0a984#egg=flatkit-dev
 flup==1.0.3.dev-20110405
 simplejson==2.6.2
 geojson==1.0.1
