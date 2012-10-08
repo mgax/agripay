@@ -26,7 +26,7 @@ App.init = function() {
 
     var money_layer = new OpenLayers.Layer.MapServer(
         "money", App.MAPSERV_URL, {layers: 'money'},
-        {gutter: 100,
+        {gutter: 200,
          projection: App.webmerc,
          isBaseLayer: false});
     map.addLayer(money_layer);
