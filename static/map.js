@@ -16,6 +16,14 @@ App.show_feature_info = function() {
 };
 
 
+App.map_clicked = function(e) {
+    var map_latlon = App.map.getLonLatFromPixel(e.xy)
+    var coords = map_latlon.transform(App.webmerc, App.wgs84);
+    console.log("You clicked near " + coords.lat + " N, " +
+                              + coords.lon + " E");
+};
+
+
 App.init = function() {
     var map = App.map = new OpenLayers.Map('map');
     map.addLayer(new OpenLayers.Layer.OSM());
@@ -36,17 +44,19 @@ App.init = function() {
          isBaseLayer: false});
     map.addLayer(money_layer);
 
-    var info_control = new OpenLayers.Control.WMSGetFeatureInfo({
-        url: App.MAPSERV_URL,
-        title: 'Identify features by clicking',
-        layers: [money_layer],
-        queryVisible: true
-    });
-    info_control.events.register("getfeatureinfo", App, App.show_feature_info);
-    map.addControl(info_control);
-    info_control.activate();
-
+    var click_control = new OpenLayers.Control;
+    click_control.handler = new OpenLayers.Handler.Click(
+        click_control,
+        {'click': App.map_clicked},
+        {'single': true,
+         'double': false,
+         'pixelTolerance': 0,
+         'stopSingle': false,
+         'stopDouble': false});
+    App.map.addControl(click_control);
+    click_control.activate();
 };
+
 
 $(document).ready(function() {
     App.init();
