@@ -55,12 +55,14 @@ $(document).ready(function() {
       {"sName": "town"},
       {"sName": "total"}
     ],
-    "sAjaxSource": {{ url_for('.dt_query')|tojson|safe }},
+    "sAjaxSource": {{ url_for('.dt_query', localitate=localitate)|tojson|safe }},
     "iDisplayLength": 20,
     "bScrollInfinite": true,
     "bScrollCollapse": true,
     "sScrollY": "400px"
   });
+
+  $('.dataTables_filter').remove();
 
   $('select[name=town]').chosen();
 

@@ -56,13 +56,18 @@ def index():
 
 @queries.route('/table')
 def table():
+    query = Record.select('sum(total) as s')
+    localitate = flask.request.args.get('localitate')
+    if localitate is not None:
+        query = query.where(Record.norm_localitate==localitate)
     stats = {
-        'sum(total)': Record.select('sum(total) as s').get().s,
+        'sum(total)': query.get().s,
     }
     towns = [r.town for r in Record.select('distinct(town) as town')]
     return flask.render_template('table.html', **{
         'stats': stats,
         'towns': sorted(towns),
+        'localitate': localitate,
     })
 
 
@@ -70,6 +75,9 @@ class RecordFilter(flatkit.datatables.FilterView):
 
     def query(self, options):
         select = Record.select()
+        localitate = flask.request.args.get('localitate')
+        if localitate is not None:
+            select = select.where(Record.norm_localitate==localitate)
 
         order_by = options.get('order_by')
         if order_by:
