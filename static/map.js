@@ -16,11 +16,33 @@ App.show_feature_info = function() {
 };
 
 
+App.show_popup = function(options) {
+    if(App.popup) {
+        App.popup.destroy();
+    }
+    App.popup = new OpenLayers.Popup.FramedCloud(
+        "the_popup",
+        new OpenLayers.LonLat(options['x'], options['y']),
+        null,
+        options['content'],
+        null,
+        true
+    );
+    App.popup.closeOnMove = true;
+    App.map.addPopup(App.popup);
+};
+
+
 App.map_clicked = function(e) {
-    var map_latlon = App.map.getLonLatFromPixel(e.xy)
-    var coords = map_latlon.transform(App.webmerc, App.wgs84);
-    console.log("You clicked near " + coords.lat + " N, " +
-                              + coords.lon + " E");
+    var map_lonlat = App.map.getLonLatFromPixel(e.xy)
+    var coords = map_lonlat.clone().transform(App.webmerc, App.wgs84);
+    var popup_content = "You clicked near " + coords.lat + " N, " +
+                              + coords.lon + " E";
+    App.show_popup({
+        'content': popup_content,
+        'x': map_lonlat.lon,
+        'y': map_lonlat.lat
+    });
 };
 
 
