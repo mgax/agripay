@@ -15,9 +15,16 @@ App.show_feature_info = function(e) {
     var map_lonlat = App.map.getLonLatFromPixel(e.xy)
     App.hide_popup();
     if(! e.text) return;
-    var popup_content = e.text;
+    var popup_content = $(e.text);
+    popup_content.find('li').each(function() {
+        var li = $(this);
+        var name = li.text();
+        var href = '/table?localitate=' + encodeURIComponent(name);
+        var link = $('<a>').text(name).attr({'href': href, 'target': '_blank'});
+        li.empty().append(link);
+    });
     App.show_popup({
-        'content': popup_content,
+        'content': $('<div>').append(popup_content).html(),
         'x': map_lonlat.lon,
         'y': map_lonlat.lat
     });
