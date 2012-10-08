@@ -30,6 +30,7 @@ class Record(Model):
     code = CharField()
     town = CharField()
     total = DecimalField()
+    norm_localitate = CharField()
 
     class Meta:
         database = db
@@ -225,9 +226,12 @@ def register_commands(manager):
         fuzzy = defaultdict(float)
         fuzzy_n = defaultdict(int)
 
-        for row in csv.DictReader(sys.stdin, delimiter=';'):
-            total = float(row['Total plati'])
-            localitate = row['Localitate']
+        Record.drop_table(fail_silently=True)
+        Record.create_table()
+
+        for row in read_and_clean_csv(sys.stdin):
+            total = float(row['total'])
+            localitate = row['town']
             if localitate not in n_localities:
                 for fix_pattern in ['MUNICIPIUL %s', 'ORAS %s']:
                     fix = fix_pattern % localitate
@@ -237,6 +241,7 @@ def register_commands(manager):
                 else:
                     if 'BUCURESTI' in localitate:
                         localitate = 'BUCURESTI SECTORUL 1'
+            row['norm_localitate'] = localitate
             n_loc = n_localities.get(localitate, 0)
             if n_loc < 1:
                 geotype['bug'] += total
@@ -249,6 +254,10 @@ def register_commands(manager):
                 fuzzy_n[localitate] += 1
             grand_total += total
             by_town[localitate] += total
+
+            Record.create(**row)
+
+        db.commit()
 
         #print 'grand total: %11d' % grand_total
         #print '   ok total: %11d (%.4f)' % (geotype['ok'],
