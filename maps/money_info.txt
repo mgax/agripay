@@ -1,0 +1,2 @@
+# MapServer template
+hello world

@@ -28,11 +28,18 @@ MAP
 
     CONNECTIONTYPE OGR
     CONNECTION "money_per_comuna.db"
-    DATA "select geometry, circle_size from ogrgeojson order by circle_size desc"
+    DATA "select geometry, circle_size, name from ogrgeojson order by circle_size desc"
 
     PROJECTION
       "init=epsg:31700"
     END
+
+    METADATA
+      wms_title "money"
+      wms_include_items "name"
+    END
+
+    TEMPLATE "_enabled"
 
     SYMBOLSCALEDENOM 3000000
 
@@ -78,9 +85,8 @@ MAP
   WEB
     METADATA
       "wms_title"           "WMS Demo Server"
-      "wms_onlineresource"  "http://my.host.com/cgi-bin/mapserv?map=wms.map&"
       "wms_srs"             "EPSG:3857"
-      "wms_enable_request"  "GetMap"
+      "wms_enable_request"  "GetCapabilities GetMap GetFeatureInfo"
     END
   END
 
