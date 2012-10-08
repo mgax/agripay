@@ -11,15 +11,29 @@ App.map_point = function(lon, lat) {
 };
 
 
-App.show_feature_info = function() {
-    console.log('show_feature_info');
+App.show_feature_info = function(e) {
+    var map_lonlat = App.map.getLonLatFromPixel(e.xy)
+    App.hide_popup();
+    if(! e.text) return;
+    var popup_content = e.text;
+    App.show_popup({
+        'content': popup_content,
+        'x': map_lonlat.lon,
+        'y': map_lonlat.lat
+    });
+};
+
+
+App.hide_popup = function() {
+    if(App.popup) {
+        App.popup.destroy();
+        App.popup = null;
+    }
 };
 
 
 App.show_popup = function(options) {
-    if(App.popup) {
-        App.popup.destroy();
-    }
+    App.hide_popup();
     App.popup = new OpenLayers.Popup.FramedCloud(
         "the_popup",
         new OpenLayers.LonLat(options['x'], options['y']),
@@ -30,19 +44,6 @@ App.show_popup = function(options) {
     );
     App.popup.closeOnMove = true;
     App.map.addPopup(App.popup);
-};
-
-
-App.map_clicked = function(e) {
-    var map_lonlat = App.map.getLonLatFromPixel(e.xy)
-    var coords = map_lonlat.clone().transform(App.webmerc, App.wgs84);
-    var popup_content = "You clicked near " + coords.lat + " N, " +
-                              + coords.lon + " E";
-    App.show_popup({
-        'content': popup_content,
-        'x': map_lonlat.lon,
-        'y': map_lonlat.lat
-    });
 };
 
 
@@ -59,24 +60,28 @@ App.init = function() {
          isBaseLayer: false});
     //map.addLayer(judete_layer);
 
-    var money_layer = new OpenLayers.Layer.MapServer(
-        "money", App.MAPSERV_URL, {layers: 'money'},
+    //var money_layer = new OpenLayers.Layer.MapServer(
+    //    "money", App.MAPSERV_URL, {layers: 'money'},
+    //    {gutter: 200,
+    //     projection: App.webmerc,
+    //     isBaseLayer: false});
+    var money_layer = new OpenLayers.Layer.WMS(
+        "money", App.MAPSERV_URL, {layers: 'money', transparent: true},
         {gutter: 200,
          projection: App.webmerc,
          isBaseLayer: false});
+    money_layer.srs = App.webmerc;
     map.addLayer(money_layer);
 
-    var click_control = new OpenLayers.Control;
-    click_control.handler = new OpenLayers.Handler.Click(
-        click_control,
-        {'click': App.map_clicked},
-        {'single': true,
-         'double': false,
-         'pixelTolerance': 0,
-         'stopSingle': false,
-         'stopDouble': false});
-    App.map.addControl(click_control);
-    click_control.activate();
+    var info_control = new OpenLayers.Control.WMSGetFeatureInfo({
+        url: App.MAPSERV_URL,
+        title: 'Identify features by clicking',
+        layers: [money_layer],
+        queryVisible: true
+    });
+    info_control.events.register("getfeatureinfo", App, App.show_feature_info);
+    map.addControl(info_control);
+    info_control.activate();
 };
 
 

@@ -13,6 +13,7 @@ def create_mapserver_app():
     def app(environ, start_response):
         request = Request(environ)
         request.GET['map'] = VIEWER_HOME / 'money.map'
+        request.GET['SRS'] = 'EPSG:3857'
         return cgi(environ, start_response)
 
     return app

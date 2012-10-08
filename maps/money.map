@@ -39,12 +39,15 @@ MAP
       wms_include_items "name"
     END
 
-    TEMPLATE "_enabled"
-
     SYMBOLSCALEDENOM 3000000
+
+    HEADER './comuna_header.html'
+    FOOTER './comuna_footer.html'
+    TOLERANCE 10
 
     CLASS
       NAME       "money_per_comuna"
+      TEMPLATE   './comuna_query.html'
 
       STYLE
         SYMBOL       "circle"
@@ -87,6 +90,7 @@ MAP
       "wms_title"           "WMS Demo Server"
       "wms_srs"             "EPSG:3857"
       "wms_enable_request"  "GetCapabilities GetMap GetFeatureInfo"
+      "wms_feature_info_mime_type" "text/html"
     END
   END
 
