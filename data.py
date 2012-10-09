@@ -307,9 +307,6 @@ def register_commands(manager):
 
         print geojson.dumps(layer, indent=2)
 
-        # ./manage.py group_by_comuna < raw/plati_fega_feadr-2010.csv > maps/money_per_comuna.geojson
-        # ogr2ogr -f sqlite -overwrite maps/money_per_comuna.db maps/money_per_comuna.geojson
-
 
 def initialize(app):
     app.register_blueprint(queries)
