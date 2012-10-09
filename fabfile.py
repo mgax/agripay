@@ -22,6 +22,7 @@ AGRIPAY_CONFIG = {
     'AGRIPAY_VENV': AGRIPAY_VENV,
     'PYTHONPATH': '.',
     'DATABASE_PATH': SARGE_HOME / 'var' / 'db.sqlite',
+    'MAPSERV_BIN': '/usr/local/mapserver-6.0.3/mapserv',
 }
 
 

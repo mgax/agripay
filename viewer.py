@@ -1,3 +1,4 @@
+import os
 from werkzeug.wsgi import DispatcherMiddleware
 from paste.cgiapp import CGIApplication
 from path import path
@@ -8,7 +9,7 @@ VIEWER_HOME = path(__file__).abspath().parent / 'maps'
 
 
 def create_mapserver_app():
-    cgi = CGIApplication({}, 'mapserv')
+    cgi = CGIApplication({}, os.environ.get('MAPSERV_BIN', 'mapserv'))
 
     def app(environ, start_response):
         request = Request(environ)
