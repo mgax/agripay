@@ -218,7 +218,7 @@ def register_commands(manager):
         #pp(not_matched)
 
     @manager.command
-    def group_by_comuna():
+    def group_by_comuna(in_file, out_file):
         localities = list(read_localities())
         n_localities = defaultdict(int)
         loc_by_name = defaultdict(list)
@@ -237,7 +237,7 @@ def register_commands(manager):
         Record.drop_table(fail_silently=True)
         Record.create_table()
 
-        for row in read_and_clean_csv(sys.stdin):
+        for row in read_and_clean_csv(open(in_file, 'rb')):
             total = float(row['total'])
             localitate = row['town']
             if localitate not in n_localities:
@@ -292,6 +292,8 @@ def register_commands(manager):
                 continue
             locs_with_name = loc_by_name[name]
             value_for_each = by_town[name] / len(locs_with_name)
+            if value_for_each < 0:
+                continue
             for l in locs_with_name:
                 the_point = geojson.Point([float(l['x']), float(l['y'])])
                 the_feature = geojson.Feature(geometry=the_point, id=l['code'])
@@ -305,7 +307,9 @@ def register_commands(manager):
                 })
                 layer.features.append(the_feature)
 
-        print geojson.dumps(layer, indent=2)
+        with open(out_file, 'wb') as f:
+            f.write(geojson.dumps(layer, indent=2))
+            f.write('\n')
 
 
 def initialize(app):
