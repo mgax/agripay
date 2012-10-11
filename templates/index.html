@@ -1,11 +1,11 @@
 <!doctype html>
 <html>
-{% set lib_url = "http://grep.ro/quickpub/lib" %}
+{% set LIB_URL = config['LIB_URL'] %}
 <head>
   <meta charset="utf-8">
   <title>AgriPay</title>
   <link rel="stylesheet"
-        href="{{ lib_url }}/OpenLayers-2.12/theme/default/style.css">
+        href="{{ LIB_URL }}/OpenLayers-2.12/theme/default/style.css">
   <style>
     #map {
       width: 940px;
@@ -19,8 +19,8 @@
   <div id="map"></div>
 
   <script>window.App = {MAPSERV_URL: "/mapserv"};</script>
-  <script src="{{ lib_url }}/jquery-1.7.2/jquery.min.js"></script>
-  <script src="{{ lib_url }}/OpenLayers-2.12/OpenLayers.js"></script>
+  <script src="{{ LIB_URL }}/jquery-1.7.2/jquery.min.js"></script>
+  <script src="{{ LIB_URL }}/OpenLayers-2.12/OpenLayers.js"></script>
   <script src="{{ url_for('static', filename='map.js') }}"></script>
 
 </body>

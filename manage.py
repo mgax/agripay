@@ -6,8 +6,14 @@ import data
 import viewer
 
 
+DEFAULT_CONFIG = {
+    'LIB_URL': 'http://grep.ro/quickpub/lib',
+}
+
+
 def create_app():
     app = flask.Flask(__name__, instance_relative_config=True)
+    app.config.update(DEFAULT_CONFIG)
     app.config.from_pyfile('settings.py', silent=True)
     data.initialize(app)
     viewer.initialize(app)
