@@ -74,7 +74,7 @@ App.init = function() {
     //     isBaseLayer: false});
     var money_layer = new OpenLayers.Layer.WMS(
         "money", App.MAPSERV_URL, {layers: 'money', transparent: true},
-        {gutter: 200,
+        {gutter: 50,
          projection: App.webmerc,
          isBaseLayer: false});
     money_layer.srs = App.webmerc;
