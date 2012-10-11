@@ -2,22 +2,22 @@ import os
 from werkzeug.wsgi import DispatcherMiddleware
 from paste.cgiapp import CGIApplication
 from path import path
-from webob import Request
+from webob.dec import wsgify
 
 
 VIEWER_HOME = path(__file__).abspath().parent / 'maps'
 
 
 def create_mapserver_app():
-    cgi = CGIApplication({}, os.environ.get('MAPSERV_BIN', 'mapserv'))
+    mapserv_cgi = CGIApplication({}, os.environ.get('MAPSERV_BIN', 'mapserv'))
 
-    def app(environ, start_response):
-        request = Request(environ)
+    @wsgify
+    def mapserv_wrapper(request):
         request.GET['map'] = VIEWER_HOME / 'money.map'
         request.GET['SRS'] = 'EPSG:3857'
-        return cgi(environ, start_response)
+        return request.get_response(mapserv_cgi)
 
-    return app
+    return mapserv_wrapper
 
 
 def initialize(app):
